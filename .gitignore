@@ -10,7 +10,7 @@
 # My own ignore rules
 .vs/
 .env
-appsettings.Development.json
+/appsettings.Development.json
 
 # Build results
 [Dd]ebug/
