@@ -12,6 +12,9 @@ builder.Services.AddSwaggerGen();
 
 // DI: email service
 builder.Services.AddSingleton<IEmailService, SmtpEmailService>();
+// Background queue and processor
+builder.Services.AddSingleton<NotionWebhookService.Services.IBackgroundTaskQueue, NotionWebhookService.Services.BackgroundTaskQueue>();
+builder.Services.AddHostedService<NotionWebhookService.Services.QueuedHostedService>();
 
 var app = builder.Build();
 

@@ -15,12 +15,14 @@ namespace NotionWebhookService.Controllers
         private readonly IEmailService _emailService;
         private readonly ILogger<WebhookController> _logger;
         private readonly string _ownerEmail;
+        private readonly IBackgroundTaskQueue _taskQueue;
 
-        public WebhookController(IEmailService emailService, ILogger<WebhookController> logger, IConfiguration config)
+        public WebhookController(IEmailService emailService, ILogger<WebhookController> logger, IConfiguration config, IBackgroundTaskQueue taskQueue)
         {
             _emailService = emailService;
             _logger = logger;
             _ownerEmail = config["OWNER_EMAIL"];
+            _taskQueue = taskQueue;
         }
 
         [HttpPost]
@@ -76,30 +78,33 @@ namespace NotionWebhookService.Controllers
                 <p>{(isSpanish ? "Saludos" : "Best")},<br/>Lautaro Rojas</p>
             ";
 
-            try
+            // Encolar trabajo pesado y responder inmediatamente
+            _taskQueue.QueueBackgroundWorkItem(async token =>
             {
-                // 1) Notificar al owner (si está configurado)
-                if (!string.IsNullOrEmpty(_ownerEmail))
+                try
                 {
-                    await _emailService.SendEmailAsync(_ownerEmail, ownerSubject, ownerBody);
-                    _logger.LogInformation("Notificación enviada al owner: {Owner}", _ownerEmail);
+                    // 1) Notificar al owner (si está configurado)
+                    if (!string.IsNullOrEmpty(_ownerEmail))
+                    {
+                        await _emailService.SendEmailAsync(_ownerEmail, ownerSubject, ownerBody);
+                        _logger.LogInformation($"Notificación enviada al owner: {_ownerEmail}");
+                    }
+                    else
+                    {
+                        _logger.LogWarning("OWNER_EMAIL no configurado. Se omite notificación al owner.");
+                    }
+
+                    // 2) Email al cliente
+                    await _emailService.SendEmailAsync(payload.CustomerEmail, userSubject, userBody);
+                    _logger.LogInformation($"Correo enviado al cliente: {payload.CustomerEmail}");
                 }
-                else
+                catch (Exception ex)
                 {
-                    _logger.LogWarning("OWNER_EMAIL no configurado. Se omite notificación al owner.");
+                    _logger.LogError(ex, "Error enviando correos en background.");
                 }
+            });
 
-                // 2) Email al cliente
-                await _emailService.SendEmailAsync(payload.CustomerEmail, userSubject, userBody);
-                _logger.LogInformation("Correo enviado al cliente: {Customer}", payload.CustomerEmail);
-
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error enviando correos.");
-                return StatusCode(500, "Error interno al enviar correos.");
-            }
+            return Ok();
         }
     }
 }
