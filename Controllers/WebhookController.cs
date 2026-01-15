@@ -42,6 +42,14 @@ namespace NotionWebhookService.Controllers
 
             bool isSpanish = !string.IsNullOrEmpty(payload.Locale) && payload.Locale.StartsWith("es", StringComparison.OrdinalIgnoreCase);
             bool isPaid = payload.TotalCustomerPayment.HasValue && payload.TotalCustomerPayment.Value > 0;
+            bool isCustomerEmailValid = payload.CustomerEmail.Contains("@") && payload.CustomerEmail.Contains(".") && payload.CustomerEmail.Length >= 5 && !string.IsNullOrWhiteSpace(payload.CustomerEmail);
+            /*
+            bool isPurchaseEvent = payload.Event == "marketplace.purchase";
+            bool isNormalCustomer = payload.CustomerEmail.EndsWith("@gmail.com", StringComparison.OrdinalIgnoreCase) ||
+                              payload.CustomerEmail.EndsWith("@yahoo.com", StringComparison.OrdinalIgnoreCase) ||
+                              payload.CustomerEmail.EndsWith("@outlook.com", StringComparison.OrdinalIgnoreCase) ||
+                              payload.CustomerEmail.EndsWith("@hotmail.com", StringComparison.OrdinalIgnoreCase);
+            */
 
             // Construir correos
             // Correo al owner (notificación)
@@ -51,16 +59,16 @@ namespace NotionWebhookService.Controllers
                 <p>AcquisitionId: <strong>{payload.AcquisitionId}</strong></p>
                 <p>Acción: <strong>{ownerAction}</strong></p>
                 <p>Fecha y hora: <strong>{payload.Time}</strong></p>
-                <p>Usuario: <strong>{payload.CustomerEmail}</strong></p>
+                <p>Usuario: <strong>{(isCustomerEmailValid ? $"{payload.CustomerEmail}" : "Sin correo")}</strong></p>
                 <p>Plantilla: <strong>{payload.TemplateName}</strong></p>
                 <p>Slug: <strong>{payload.TemplateSlug}</strong></p>
                 <p>Idioma: <strong>{payload.Locale}</strong></p>
                 <p>Cupón aplicado: <strong>{payload.CouponCode}</strong></p>
-                <p>Precio de lista: <strong>{payload.ListingPrice}</strong></p>
-                <p>Precio con descuento: <strong>{payload.DiscountedPrice}</strong></p>
-                <p>Impuestos: <strong>{payload.TaxAmount}</strong></p>
-                <p>Total pagado por el cliente: <strong>{payload.TotalCustomerPayment}</strong></p>
-                <p>Monto de transferencia al vendedor: <strong>{payload.SellerTransferAmount}</strong></p>
+                <p>Precio de lista: <strong>{payload.ListingPrice} USD</strong></p>
+                <p>Precio con descuento: <strong>{payload.DiscountedPrice} USD</strong></p>
+                <p>Impuestos: <strong>{payload.TaxAmount} USD</strong></p>
+                <p>Total pagado por el cliente: <strong>{payload.TotalCustomerPayment} USD</strong></p>
+                <p>Monto de transferencia al vendedor: <strong>{payload.SellerTransferAmount} USD</strong></p>
             ";
 
             // Correo al cliente
@@ -70,10 +78,7 @@ namespace NotionWebhookService.Controllers
                 <p>{(isSpanish ? "Gracias totales!" : "Best!")}<p>
                 <span class='gmail_signature_prefix'>-- </span>
                 <div dir='ltr' class='gmail_signature' data-smartmail='gmail_signature'>
-                    <div dir='ltr'>Lautaro Rojas - Notion Builder - <a href='https://www.notion.com/@lautaro_rojas' target='_blank';source=gmail&amp;>Marketplace</a>
-                        <div>
-                            <img width='85' height='88' src=''http://notionmarketplacewebhook-dev.72.60.155.43.nip.io/Images/Logo-block-stickerized.png' style='margin-right:0px' class='CToWUd' data-bit='iit'>
-                        </div>
+                    <div dir='ltr'>Lautaro Rojas - Notion Builder - <a href='https://www.notion.com/@lautaro_rojas' target='_blank';source=gmail&amp;>{(isSpanish ? "Perfil de Notion Marketplace" : "Notion Marketplace profile")}</a>
                     </div>
                 </div>
             ";
@@ -85,11 +90,11 @@ namespace NotionWebhookService.Controllers
                     : $"Thank you for purchasing the template: {payload.TemplateName}";
 
                 userBody = $@"
-                    <h1>{(isSpanish ? "Hola!" : "Hello!")}</h1>
-                    <p>{(isSpanish ? "Gracias por tu compra de" : "Thanks for purchasing")} <strong>{payload.TemplateName}</strong>.</p>
-                    <ul>
-                        <li><strong>Tip:</strong> {(isSpanish ? "No olvides hacer clic en 'Duplicate' para guardarla." : "Remember to click 'Duplicate' to save it.")}</li>
-                    </ul>
+                    <h1>{(isSpanish ? "Hola! 👋" : "Hello! 👋")}</h1>
+                    <p>{(isSpanish ? "Gracias por comprar la plantilla " : "Thanks for purchasing the template ")} <strong>{payload.TemplateName}</strong>! {(isSpanish ? "Me alegra mucho que te haya interesado." : "I'm so glad you were interested.")}</p>
+                    <p>{(isSpanish ? "He diseñado esta plantilla para que puedas enfocarte en lo importante y eliminar el ruido de forma sencilla y eficiente. Espero que te aporte mucho valor desde el primer día." : "I built this tool to help you focus on what matters and clear the clutter in a simple and effective way. I hope you find it valuable!")}</p>
+                    <P>{(isSpanish ? "Si te resulta útil, me ayudarías muchísimo escribiendo una valoración en Notion Marketplace." : "If you find it useful, it would help me a lot to write a review on Notion Marketplace.")}</p>
+                    <p>{(isSpanish ? "Si tienes alguna pregunta o necesitas ayuda, no dudes en contactarme respondiendo a este correo." : "If you have any questions or need assistance, feel free to reach out by replying to this email.")}</p>
                     " + emailSignature;
             }
             else
@@ -101,10 +106,7 @@ namespace NotionWebhookService.Controllers
                 userBody = $@"
                     <h1>{(isSpanish ? "Hola! 👋" : "Hello! 👋")}</h1>
                     <p>{(isSpanish ? "Gracias por descargar la plantilla " : "Thanks for downloading the template ")} <strong>{payload.TemplateName}</strong>! {(isSpanish ? "Me alegra mucho que te haya interesado." : "I'm so glad you were interested.")}</p>
-                    <p>{(isSpanish ? "He diseñado esta herramienta para que puedas enfocarte en lo importante y eliminar el ruido de forma sencilla y eficiente. Espero que te aporte mucho valor desde el primer día." : "I built this tool to help you focus on what matters and clear the clutter in a simple and effective way. I hope you find it valuable!")}</p>
-                    <ul>
-                        <li><strong>Tip:</strong> {(isSpanish ? "No olvides hacer clic en 'Duplicate' para guardarla." : "Remember to click 'Duplicate' to save it.")}</li>
-                    </ul>
+                    <p>{(isSpanish ? "He diseñado esta plantilla para que puedas enfocarte en lo importante y eliminar el ruido de forma sencilla y eficiente. Espero que te aporte mucho valor desde el primer día." : "I built this tool to help you focus on what matters and clear the clutter in a simple and effective way. I hope you find it valuable!")}</p>
                     <P>{(isSpanish ? "Si te resulta útil, me ayudarías muchísimo escribiendo una valoración en Notion Marketplace." : "If you find it useful, it would help me a lot to write a review on Notion Marketplace.")}</p>
                     <p>{(isSpanish ? "Si tienes alguna pregunta o necesitas ayuda, no dudes en contactarme respondiendo a este correo." : "If you have any questions or need assistance, feel free to reach out by replying to this email.")}</p>
                     " + emailSignature;
@@ -119,18 +121,25 @@ namespace NotionWebhookService.Controllers
                     if (!string.IsNullOrEmpty(_ownerEmail))
                     {
                         await _emailService.SendEmailAsync(_ownerEmail, ownerSubject, ownerBody);
-                        _logger.LogInformation($"Notificación enviada al owner: {_ownerEmail}");
+                        _logger.LogInformation($"1) Notificación enviada al owner: {_ownerEmail}");
                     }
                     else
                     {
-                        _logger.LogWarning("OWNER_EMAIL no configurado. Se omite notificación al owner.");
+                        _logger.LogWarning("1) OWNER_EMAIL no configurado. Se omite notificación al owner.");
                     }
 
-                    // TODO: Habilitar envío al cliente en producción
                     // 2) Email al cliente
-                    await _emailService.SendEmailAsync(payload.CustomerEmail, userSubject, userBody);
-                    _logger.LogInformation($"Correo enviado al cliente: {payload.CustomerEmail}");
-                    
+                    if (isCustomerEmailValid)
+                    {
+                        _logger.LogInformation($"2) Correo del cliente válido. Procediendo a envío.");
+                        await _emailService.SendEmailAsync(payload.CustomerEmail, userSubject, userBody);
+                        _logger.LogInformation($"3) Correo enviado al cliente: {payload.CustomerEmail}");
+                    }
+                    else
+                    {
+                       _logger.LogWarning($"2) Correo del cliente no válido. Se omite envío al cliente.");
+                        return;
+                    }
                 }
                 catch (Exception ex)
                 {
