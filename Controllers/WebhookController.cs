@@ -49,13 +49,18 @@ namespace NotionWebhookService.Controllers
             string ownerSubject = $"Se { (isPaid ? "compró" : "descargó") } tu plantilla de Notion";
             string ownerBody = $@"
                 <p>AcquisitionId: <strong>{payload.AcquisitionId}</strong></p>
+                <p>Acción: <strong>{ownerAction}</strong></p>
+                <p>Fecha y hora: <strong>{payload.Time}</strong></p>
+                <p>Usuario: <strong>{payload.CustomerEmail}</strong></p>
                 <p>Plantilla: <strong>{payload.TemplateName}</strong></p>
                 <p>Slug: <strong>{payload.TemplateSlug}</strong></p>
-                <p>Acción: <strong>{ownerAction}</strong></p>
-                <p>Usuario: <strong>{payload.CustomerEmail}</strong></p>
+                <p>Idioma: <strong>{payload.Locale}</strong></p>
+                <p>Cupón aplicado: <strong>{payload.CouponCode}</strong></p>
                 <p>Precio de lista: <strong>{payload.ListingPrice}</strong></p>
+                <p>Precio con descuento: <strong>{payload.DiscountedPrice}</strong></p>
+                <p>Impuestos: <strong>{payload.TaxAmount}</strong></p>
                 <p>Total pagado por el cliente: <strong>{payload.TotalCustomerPayment}</strong></p>
-                <p>Monto de transferencia: <strong>{payload.SellerTransferAmount}</strong></p>
+                <p>Monto de transferencia al vendedor: <strong>{payload.SellerTransferAmount}</strong></p>
                 
             ";
 
@@ -94,9 +99,11 @@ namespace NotionWebhookService.Controllers
                         _logger.LogWarning("OWNER_EMAIL no configurado. Se omite notificación al owner.");
                     }
 
+                    /* TODO: Habilitar envío al cliente más adelante
                     // 2) Email al cliente
                     await _emailService.SendEmailAsync(payload.CustomerEmail, userSubject, userBody);
                     _logger.LogInformation($"Correo enviado al cliente: {payload.CustomerEmail}");
+                    */
                 }
                 catch (Exception ex)
                 {
