@@ -61,27 +61,54 @@ namespace NotionWebhookService.Controllers
                 <p>Impuestos: <strong>{payload.TaxAmount}</strong></p>
                 <p>Total pagado por el cliente: <strong>{payload.TotalCustomerPayment}</strong></p>
                 <p>Monto de transferencia al vendedor: <strong>{payload.SellerTransferAmount}</strong></p>
-                
             ";
 
             // Correo al cliente
-            string userSubject = isPaid
-                ? (isSpanish ? $"Gracias por comprar la plantilla: {payload.TemplateName}" : $"Thank you for your purchase: {payload.TemplateName}")
-                : (isSpanish ? $"Gracias por descargar la plantilla: {payload.TemplateName}" : $"Thanks for downloading: {payload.TemplateName}");
-
-            string actionText = isPaid ? (isSpanish ? "compra" : "purchase") : (isSpanish ? "descarga" : "download");
-            string accessLink = (isSpanish ? "Abrir Plantilla" : "Open Template");
-            string tipText = isSpanish ? "No olvides darle a 'Duplicate' para guardarla." : "Remember to click 'Duplicate' to save it.";
-
-            string userBody = $@"
-                <h1>{(isSpanish ? "Hola!" : "Hello!")}</h1>
-                <p>{(isSpanish ? "Gracias por" : "Thanks for")} <strong>{(isPaid ? "tu compra de" : "downloading")}</strong> <strong>{payload.TemplateName}</strong>.</p>
-                <ul>
-                    <li><strong>Acceso:</strong> <a href='{(Request?.Host.HasValue == true ? $"{Request.Scheme}://{Request.Host}" : "")}/templates/{payload.TemplateName}'> {accessLink} </a></li>
-                    <li><strong>Tip:</strong> {tipText}</li>
-                </ul>
-                <p>{(isSpanish ? "Saludos" : "Best")},<br/>Lautaro Rojas</p>
+            string userSubject;
+            string userBody;
+            string emailSignature = $@"
+                <p>{(isSpanish ? "Gracias totales!" : "Best!")}<p>
+                <span class='gmail_signature_prefix'>-- </span>
+                <div dir='ltr' class='gmail_signature' data-smartmail='gmail_signature'>
+                    <div dir='ltr'>Lautaro Rojas - Notion Builder - <a href='https://www.notion.com/@lautaro_rojas' target='_blank';source=gmail&amp;>Marketplace</a>
+                        <div>
+                            <img width='85' height='88' src=''https://notionmarketplacewebhook.72.60.155.43.nip.io/Images/Logo-block-stickerized.png' style='margin-right:0px' class='CToWUd' data-bit='iit'>
+                        </div>
+                    </div>
+                </div>
             ";
+
+            if (isPaid)
+            {
+                userSubject = isSpanish
+                    ? $"Gracias por comprar la plantilla: {payload.TemplateName}"
+                    : $"Thank you for purchasing the template: {payload.TemplateName}";
+
+                userBody = $@"
+                    <h1>{(isSpanish ? "Hola!" : "Hello!")}</h1>
+                    <p>{(isSpanish ? "Gracias por tu compra de" : "Thanks for purchasing")} <strong>{payload.TemplateName}</strong>.</p>
+                    <ul>
+                        <li><strong>Tip:</strong> {(isSpanish ? "No olvides hacer clic en 'Duplicate' para guardarla." : "Remember to click 'Duplicate' to save it.")}</li>
+                    </ul>
+                    " + emailSignature;
+            }
+            else
+            {
+                userSubject = isSpanish
+                    ? $"Gracias por descargar la plantilla: {payload.TemplateName}"
+                    : $"Thank you for downloading the template: {payload.TemplateName}";
+
+                userBody = $@"
+                    <h1>{(isSpanish ? "Hola! 👋" : "Hello! 👋")}</h1>
+                    <p>{(isSpanish ? "Gracias por descargar la plantilla " : "Thanks for downloading the template ")} <strong>{payload.TemplateName}</strong>! {(isSpanish ? "Me alegra mucho que te haya interesado." : "I'm so glad you were interested.")}</p>
+                    <p>{(isSpanish ? "He diseñado esta herramienta para que puedas enfocarte en lo importante y eliminar el ruido de forma sencilla y eficiente. Espero que te aporte mucho valor desde el primer día." : "I built this tool to help you focus on what matters and clear the clutter in a simple and effective way. I hope you find it valuable!")}</p>
+                    <ul>
+                        <li><strong>Tip:</strong> {(isSpanish ? "No olvides hacer clic en 'Duplicate' para guardarla." : "Remember to click 'Duplicate' to save it.")}</li>
+                    </ul>
+                    <P>{(isSpanish ? "Si te resulta útil, me ayudarías muchísimo escribiendo una valoración en Notion Marketplace." : "If you find it useful, it would help me a lot to write a review on Notion Marketplace.")}</p>
+                    <p>{(isSpanish ? "Si tienes alguna pregunta o necesitas ayuda, no dudes en contactarme respondiendo a este correo." : "If you have any questions or need assistance, feel free to reach out by replying to this email.")}</p>
+                    " + emailSignature;
+            }
 
             // Encolar trabajo pesado y responder inmediatamente
             _taskQueue.QueueBackgroundWorkItem(async token =>
@@ -99,7 +126,7 @@ namespace NotionWebhookService.Controllers
                         _logger.LogWarning("OWNER_EMAIL no configurado. Se omite notificación al owner.");
                     }
 
-                    /* TODO: Habilitar envío al cliente más adelante
+                    /* TODO: Habilitar envío al cliente en producción
                     // 2) Email al cliente
                     await _emailService.SendEmailAsync(payload.CustomerEmail, userSubject, userBody);
                     _logger.LogInformation($"Correo enviado al cliente: {payload.CustomerEmail}");

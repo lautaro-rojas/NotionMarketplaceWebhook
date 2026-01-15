@@ -24,6 +24,7 @@ app.UseSwaggerUI();
 
 // Middlewares
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 app.MapControllers();
 
 app.Run();
