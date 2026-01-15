@@ -4,7 +4,7 @@ namespace NotionWebhookService.Models
     {
         public string? AcquisitionId { get; set; }
         public string? Event { get; set; } // "marketplace.purchase" (compra) o "marketplace.refund" (reembolso)
-        public DateTime? Time { get; set; } // La fecha y hora en que se realizó la transacción del Marketplace.
+        public string? Time { get; set; } // La fecha y hora en que se realizó la transacción del Marketplace.
         public string? CustomerEmail { get; set; }
         public string? TemplateName { get; set; }
         public string? TemplateSlug { get; set; }
