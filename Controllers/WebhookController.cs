@@ -72,7 +72,7 @@ namespace NotionWebhookService.Controllers
                 <div dir='ltr' class='gmail_signature' data-smartmail='gmail_signature'>
                     <div dir='ltr'>Lautaro Rojas - Notion Builder - <a href='https://www.notion.com/@lautaro_rojas' target='_blank';source=gmail&amp;>Marketplace</a>
                         <div>
-                            <img width='85' height='88' src=''https://notionmarketplacewebhook-dev.72.60.155.43.nip.io/Images/Logo-block-stickerized.png' style='margin-right:0px' class='CToWUd' data-bit='iit'>
+                            <img width='85' height='88' src=''http://notionmarketplacewebhook-dev.72.60.155.43.nip.io/Images/Logo-block-stickerized.png' style='margin-right:0px' class='CToWUd' data-bit='iit'>
                         </div>
                     </div>
                 </div>
