@@ -28,6 +28,10 @@ namespace NotionWebhookService.Controllers
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] NotionPayload payload)
         {
+            Console.WriteLine(payload.AcquisitionId);
+            Console.WriteLine(payload.Time);
+            Console.WriteLine(payload.CouponCode);
+            
             _logger.LogInformation("Webhook recibido");
 
             if (payload == null)
@@ -120,7 +124,7 @@ namespace NotionWebhookService.Controllers
                     // 1) Notificar al owner (si está configurado)
                     if (!string.IsNullOrEmpty(_ownerEmail))
                     {
-                        await _emailService.SendEmailAsync(_ownerEmail, ownerSubject, ownerBody);
+                        // await _emailService.SendEmailAsync(_ownerEmail, ownerSubject, ownerBody);
                         _logger.LogInformation($"1) Notificación enviada al owner: {_ownerEmail}");
                     }
                     else
@@ -132,7 +136,7 @@ namespace NotionWebhookService.Controllers
                     if (isCustomerEmailValid)
                     {
                         _logger.LogInformation($"2) Correo del cliente válido. Procediendo a envío.");
-                        await _emailService.SendEmailAsync(payload.CustomerEmail, userSubject, userBody);
+                        // await _emailService.SendEmailAsync(payload.CustomerEmail, userSubject, userBody);
                         _logger.LogInformation($"3) Correo enviado al cliente: {payload.CustomerEmail}");
                     }
                     else
@@ -146,7 +150,7 @@ namespace NotionWebhookService.Controllers
                     _logger.LogError(ex, "Error enviando correos en background.");
                 }
             });
-
+            
             return Ok();
         }
     }
