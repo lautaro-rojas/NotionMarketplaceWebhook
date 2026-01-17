@@ -11,7 +11,8 @@ namespace NotionWebhookService.Models
         public string? Event { get; set; } // "marketplace.purchase" (compra) o "marketplace.refund" (reembolso)
         
         [JsonPropertyName("time")]
-        public string? Time { get; set; } // La fecha y hora en que se realizó la transacción del Marketplace.
+        public long Time 
+        { get; set; } // La fecha y hora en que se realizó la transacción del Marketplace.
         
         [JsonPropertyName("customerEmail")]
         public string? CustomerEmail { get; set; }
@@ -23,7 +24,7 @@ namespace NotionWebhookService.Models
         public string? TemplateSlug { get; set; }
         
         [JsonPropertyName("locale")]
-        public string? Locale { get; set; } // Idioma del cliente. ej: "en-US", "es-LA"
+        public string? Locale { get; set; } // Idioma del cliente. ej: "en-us", "es-la"
         
         [JsonPropertyName("couponCode")]
         public string? CouponCode { get; set; } // Código de cupón aplicado, si corresponde
@@ -42,5 +43,14 @@ namespace NotionWebhookService.Models
         
         [JsonPropertyName("sellerTransferAmount")]
         public long? SellerTransferAmount { get; set; } // Monto transferido al vendedor
-    }
+
+        public DateTime EventDate
+        {
+            get 
+            {
+                // Convierte los milisegundos a un objeto fecha UTC
+                return DateTimeOffset.FromUnixTimeMilliseconds(Time).UtcDateTime;
+            }
+        }
+    }   
 }

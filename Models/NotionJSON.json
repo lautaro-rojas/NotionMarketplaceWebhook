@@ -1,0 +1,17 @@
+{
+    "acquisitionId": "0f7fe729-4547-45c2-ae3f-5f3308e4de56",
+    "time": 1768691186412,
+    "event": "webhook.test",
+    "templateName": "Test Template",
+    "templateSlug": "test",
+    "listingPrice": 1000,
+    "discountedPrice": 9000,
+    "totalPrice": 9090,
+    "couponCode": "TEST10PERCENT",
+    "source": "in_app",
+    "locale": "en-us",
+    "customerEmail": "test_webhook@notion.so",
+    "totalCustomerPayment": 9090,
+    "taxAmount": 90,
+    "sellerTransferAmount": 8989
+}

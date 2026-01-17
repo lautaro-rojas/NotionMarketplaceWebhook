@@ -26,10 +26,11 @@ namespace NotionWebhookService.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] System.Text.Json.JsonElement payload)
+        public async Task<IActionResult> Post([FromBody] NotionPayload payload)
         {
-            Console.WriteLine(payload.ToString());
-            /*
+            //Console.WriteLine(payload.Time.ToString());
+            //Console.WriteLine(payload.EventDate.ToString("dd/MM/yyyy HH:mm:ss"));
+            
             _logger.LogInformation("Webhook recibido");
 
             if (payload == null)
@@ -51,7 +52,7 @@ namespace NotionWebhookService.Controllers
                               payload.CustomerEmail.EndsWith("@yahoo.com", StringComparison.OrdinalIgnoreCase) ||
                               payload.CustomerEmail.EndsWith("@outlook.com", StringComparison.OrdinalIgnoreCase) ||
                               payload.CustomerEmail.EndsWith("@hotmail.com", StringComparison.OrdinalIgnoreCase);
-            Finaliza
+            Finaliza*/
 
             // Construir correos
             // Correo al owner (notificación)
@@ -148,7 +149,7 @@ namespace NotionWebhookService.Controllers
                     _logger.LogError(ex, "Error enviando correos en background.");
                 }
             });
-            */
+            
             return Ok();
         }
     }
