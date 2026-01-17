@@ -46,8 +46,9 @@ namespace NotionWebhookService.Controllers
             bool isSpanish = !string.IsNullOrEmpty(payload.Locale) && payload.Locale.StartsWith("es", StringComparison.OrdinalIgnoreCase);
             bool isPaid = payload.TotalCustomerPayment.HasValue && payload.TotalCustomerPayment.Value > 0;
             bool isCustomerEmailValid = payload.CustomerEmail.Contains("@") && payload.CustomerEmail.Contains(".") && payload.CustomerEmail.Length >= 5 && !string.IsNullOrWhiteSpace(payload.CustomerEmail);
-            /*
             bool isPurchaseEvent = payload.Event == "marketplace.purchase";
+            bool isTestEvent = payload.Event == "webhook.test";
+            /*
             bool isNormalCustomer = payload.CustomerEmail.EndsWith("@gmail.com", StringComparison.OrdinalIgnoreCase) ||
                               payload.CustomerEmail.EndsWith("@yahoo.com", StringComparison.OrdinalIgnoreCase) ||
                               payload.CustomerEmail.EndsWith("@outlook.com", StringComparison.OrdinalIgnoreCase) ||
@@ -121,9 +122,9 @@ namespace NotionWebhookService.Controllers
                 try
                 {
                     // 1) Notificar al owner (si está configurado)
-                    if (!string.IsNullOrEmpty(_ownerEmail))
+                    if (isPurchaseEvent && !string.IsNullOrEmpty(_ownerEmail))
                     {
-                        // await _emailService.SendEmailAsync(_ownerEmail, ownerSubject, ownerBody);
+                        await _emailService.SendEmailAsync(_ownerEmail, ownerSubject, ownerBody);
                         _logger.LogInformation($"1) Notificación enviada al owner: {_ownerEmail}");
                     }
                     else
@@ -132,15 +133,22 @@ namespace NotionWebhookService.Controllers
                     }
 
                     // 2) Email al cliente
-                    if (isCustomerEmailValid)
+                    if (isPurchaseEvent && isCustomerEmailValid)
                     {
                         _logger.LogInformation($"2) Correo del cliente válido. Procediendo a envío.");
-                        // await _emailService.SendEmailAsync(payload.CustomerEmail, userSubject, userBody);
+                        await _emailService.SendEmailAsync(payload.CustomerEmail, userSubject, userBody);
                         _logger.LogInformation($"3) Correo enviado al cliente: {payload.CustomerEmail}");
                     }
                     else
                     {
                        _logger.LogWarning($"2) Correo del cliente no válido. Se omite envío al cliente.");
+                        return;
+                    }
+
+                    if (isTestEvent)
+                    {
+                        _logger.LogInformation($"Evento de TESTEO. Notificación enviada al owner: {_ownerEmail}");
+                        await _emailService.SendEmailAsync(_ownerEmail, ownerSubject, ownerBody);
                         return;
                     }
                 }
