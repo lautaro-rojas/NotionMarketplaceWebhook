@@ -28,8 +28,8 @@ namespace NotionWebhookService.Controllers
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] NotionPayload payload)
         {
-            //Console.WriteLine(payload.Time.ToString());
-            //Console.WriteLine(payload.EventDate.ToString("dd/MM/yyyy HH:mm:ss"));
+            Console.WriteLine(payload.Time.ToString());
+            Console.WriteLine(payload.EventDate.ToString("dd/MM/yyyy HH:mm:ss"));
             
             _logger.LogInformation("Webhook recibido");
 
@@ -61,7 +61,7 @@ namespace NotionWebhookService.Controllers
             string ownerBody = $@"
                 <p>AcquisitionId: <strong>{payload.AcquisitionId}</strong></p>
                 <p>Acción: <strong>{ownerAction}</strong></p>
-                <p>Fecha y hora: <strong>{payload.Time}</strong></p>
+                <p>Fecha y hora: <strong>{payload.EventDate.ToString("dd/MM/yyyy HH:mm:ss")}</strong></p>
                 <p>Usuario: <strong>{(isCustomerEmailValid ? $"{payload.CustomerEmail}" : "Sin correo")}</strong></p>
                 <p>Plantilla: <strong>{payload.TemplateName}</strong></p>
                 <p>Slug: <strong>{payload.TemplateSlug}</strong></p>
