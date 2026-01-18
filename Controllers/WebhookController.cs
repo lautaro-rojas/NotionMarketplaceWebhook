@@ -151,6 +151,10 @@ namespace NotionWebhookService.Controllers
                         await _emailService.SendEmailAsync(_ownerEmail, ownerSubject, ownerBody);
                         return;
                     }
+                    else
+                    {
+                        _logger.LogInformation($"NO SE Q PASO");
+                    }
                 }
                 catch (Exception ex)
                 {
