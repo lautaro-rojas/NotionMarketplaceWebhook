@@ -151,11 +151,11 @@ namespace NotionWebhookService.Controllers
                 <p>Slug: <strong>{payload.TemplateSlug}</strong></p>
                 <p>Idioma: <strong>{payload.Locale}</strong></p>
                 <p>Cupón aplicado: <strong>{payload.CouponCode}</strong></p>
-                <p>Precio de lista: <strong>{payload.ListingPrice} USD</strong></p>
-                <p>Precio con descuento: <strong>{payload.DiscountedPrice} USD</strong></p>
-                <p>Impuestos: <strong>{payload.TaxAmount} USD</strong></p>
-                <p>Total pagado por el cliente: <strong>{payload.TotalCustomerPayment} USD</strong></p>
-                <p>Monto de transferencia al vendedor: <strong>{payload.SellerTransferAmount} USD</strong></p>
+                <p>Precio de lista: <strong>{payload.ListingPrice / 100.0m} USD</strong></p>
+                <p>Precio con descuento: <strong>{payload.DiscountedPrice / 100.0m} USD</strong></p>
+                <p>Impuestos: <strong>{payload.TaxAmount / 100.0m} USD</strong></p>
+                <p>Total pagado por el cliente: <strong>{payload.TotalCustomerPayment / 100.0m} USD</strong></p>
+                <p>Monto de transferencia al vendedor: <strong>{payload.SellerTransferAmount / 100.0m} USD</strong></p>
             ";
         }
 
